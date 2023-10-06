@@ -13,8 +13,12 @@
 
 ## Installation
 
-To use `node-decorated-saga` in your Node.js project, you can install it via npm:
+You will need to add a `.npmrc` file to the root of the project directory as the library is hosted on github and not on npmjs.
+```
+@goninaapp:registry=https://npm.pkg.github.com
+```
 
+Then to install `node-decorated-saga` in your Node.js project, you can install it via npm:
 ```bash
 yarn add node-decorated-saga
 ```
@@ -70,22 +74,22 @@ To run the tests locally, follow these steps:
 
 1. Clone the repository:
 
-   ```bash
-   git clone https://github.com/goninaapp/node-decorated-saga.git
-   ```
+```bash
+git clone https://github.com/goninaapp/node-decorated-saga.git
+```
 
 2. Install project dependencies:
 
-   ```bash
-   cd node-decorated-saga
-   yarn install
-   ```
+```bash
+cd node-decorated-saga
+yarn install
+```
 
 3. Run the tests:
 
-   ```bash
-   yarn test
-   ```
+```bash
+yarn test
+```
 
 ## Contributing
 

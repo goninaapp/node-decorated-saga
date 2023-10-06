@@ -19,6 +19,8 @@ jobs:
           node-version: 18
           cache: 'yarn'
 
+      - run: yarn install --frozen-lockfile --production=false
+
       - name: Test
         run: |
           yarn test

@@ -21,8 +21,10 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
           cache: 'yarn'
 
-      - run: npm ci
+      - run: |
+          yarn install --frozen-lockfile --production=false
+          yarn build
 
-      - run: npm publish
+      - run: yarn publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
