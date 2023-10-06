@@ -38,13 +38,14 @@ jobs:
         run: |
           echo "previous_version=${{ steps.previoustag.outputs.tag }}" >> "$GITHUB_ENV"
           CURRENT_VERSION=$(cat package.json | jq -r '.version')
-          echo "current_version=${CURRENT_VERSION}" >> "$GITHUB_ENV"
-          echo "$GITHUB_ENV"
+          echo "current_version=v${CURRENT_VERSION}" >> "$GITHUB_ENV"
+          echo "${{ steps.previoustag.outputs.tag }}"
+          echo "${CURRENT_VERSION}"
 
       - name: Set new tag
         if: env.previous_version != env.current_version
         uses: rickstaa/action-create-tag@v1
         with:
           github_token: ${{ secrets.PAT }}
-          tag: v${{ env.current_version }}
+          tag: ${{ env.current_version }}
           message: "Release ${{ env.current_version }}"
