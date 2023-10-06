@@ -3,13 +3,13 @@ import {
   KinesisStreamBatchResponse,
   KinesisStreamEvent,
   KinesisStreamRecord,
-} from "aws-lambda";
+} from 'aws-lambda';
 import {
   Kinesis,
   PutRecordCommand,
   PutRecordCommandInput,
-} from "@aws-sdk/client-kinesis";
-import { v4 as uuidv4 } from "uuid";
+} from '@aws-sdk/client-kinesis';
+import { v4 as uuidv4 } from 'uuid';
 
 export class Decoration {
   type: string;
@@ -18,8 +18,8 @@ export class Decoration {
   payload: any;
 
   constructor(type?: string, service?: string, payload?: any) {
-    this.type = type || "";
-    this.service = service || "";
+    this.type = type || '';
+    this.service = service || '';
     this.timestamp = Date.now();
     this.payload = payload || {};
   }
@@ -35,16 +35,16 @@ export class Payload {
   private _service: string;
 
   constructor(saga?: string, context?: Decoration) {
-    this.version = "v1";
+    this.version = 'v1';
     this.correlationId = uuidv4();
     this.publishTime = Date.now();
 
-    this.saga = saga || "";
+    this.saga = saga || '';
     this.context = context || new Decoration();
 
     this.decorations = [];
 
-    this._service = "";
+    this._service = '';
   }
 
   static fromJSON(json: string): Payload {
@@ -61,7 +61,7 @@ export class Payload {
   validateAndSet(service: string) {
     this._service = service;
 
-    if (this.version !== "v1") {
+    if (this.version !== 'v1') {
       return false;
     }
 
@@ -73,8 +73,8 @@ export class Payload {
   }
 
   decorate(type: string, payload: any) {
-    if (!this._service || this._service === "") {
-      throw new Error("service name not set");
+    if (!this._service || this._service === '') {
+      throw new Error('service name not set');
     }
 
     this.decorations = this.decorations || [];
@@ -98,7 +98,7 @@ export class Payload {
 
   stringify(): string {
     return JSON.stringify(this, (key, value) => {
-      if (key.startsWith("_")) {
+      if (key.startsWith('_')) {
         return undefined;
       }
       return value;
@@ -153,24 +153,24 @@ export class Handler {
   async handleRecord(
     rec: KinesisStreamRecord,
   ): Promise<HandlerError | undefined> {
-    const data = Buffer.from(rec.kinesis.data, "base64").toString("utf-8");
+    const data = Buffer.from(rec.kinesis.data, 'base64').toString('utf-8');
     const payload = Payload.fromJSON(data);
 
     // We validate that the service has not processed this message before and that the version is correct.
     if (!payload.validateAndSet(this.serviceName)) {
-      console.log("Message not processed by service", payload);
+      console.log('Message not processed by service', payload);
       return;
     }
 
     const handler = this.handlers.get(payload.saga);
     if (!handler) {
-      console.log("No handler for message", payload);
+      console.log('No handler for message', payload);
       return;
     }
 
     const res = await handler(payload);
     if (res) {
-      console.log("handler error", res);
+      console.log('handler error', res);
       return new HandlerError(rec.kinesis.sequenceNumber, res.message);
     }
 
@@ -182,7 +182,7 @@ export class Handler {
 
     const input: PutRecordCommandInput = {
       // PutRecordInput
-      StreamName: "message-bus",
+      StreamName: 'message-bus',
       Data: enc.encode(payload.stringify()),
       PartitionKey: payload.saga,
     };

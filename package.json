@@ -9,10 +9,10 @@
     "dist"
   ],
   "scripts": {
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "format": "prettier --write \"src/**/*.ts\"",
     "build": "tsup",
     "test": "jest",
-    "test:format": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\""
+    "test:format": "prettier --check \"src/**/*.ts\""
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.122",
