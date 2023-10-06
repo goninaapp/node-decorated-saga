@@ -1,0 +1,26 @@
+name: dev
+on:
+  pull_request:
+    branches: ['*']
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'yarn'
+
+      - name: Test
+        run: |
+          yarn test
+          yarn test:format
+          tsc

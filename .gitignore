@@ -1,0 +1,18 @@
+*.js
+!jest.config.js
+*.d.ts
+node_modules
+dist
+
+# CDK asset staging directory
+.cdk.staging
+cdk.out
+
+/node_modules
+
+# Ignore test-related files
+/coverage.data
+/coverage/
+
+# Build files
+/dist
