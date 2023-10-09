@@ -196,15 +196,15 @@ describe('index', () => {
     } as unknown as KinesisStreamEvent;
 
     let called = false;
-    handler.registerProvider("test", async (event: Payload): Promise<any> => {
+    handler.registerProvider('test', async (event: Payload): Promise<any> => {
       called = true;
-      return new Error("hello world");
+      return new Error('hello world');
     });
 
     let result = await handler.handler(event1);
     expect(result).toBeDefined();
     expect(result).toStrictEqual({
-      "batchItemFailures": [],
+      batchItemFailures: [],
     });
     expect(called).toBe(false);
 
@@ -222,9 +222,11 @@ describe('index', () => {
 
     expect(result).toBeDefined();
     expect(result).toStrictEqual({
-      "batchItemFailures": [{
-        "itemIdentifier": "3247",
-      }],
+      batchItemFailures: [
+        {
+          itemIdentifier: '3247',
+        },
+      ],
     });
     expect(called).toBe(true);
 
@@ -244,7 +246,7 @@ describe('index', () => {
 
     expect(result).toBeDefined();
     expect(result).toStrictEqual({
-      "batchItemFailures": [],
+      batchItemFailures: [],
     });
     expect(called).toBe(false);
   });
