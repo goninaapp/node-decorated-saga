@@ -54,6 +54,12 @@ export class Payload {
     this._service = '';
   }
 
+  public addRequest(type: string) {
+    if (!this.requested.includes(type)) {
+      this.requested.push(type);
+    }
+  }
+
   static fromJSON(json: string): Payload {
     const payload = JSON.parse(json);
     const p = new Payload(payload.saga, payload.context);
