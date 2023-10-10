@@ -79,7 +79,7 @@ export class Payload {
       return false;
     }
 
-    if (this.context.service === service) {
+    if (this.context.service === service && this.nextRequest() !== undefined) {
       return false;
     }
 
