@@ -252,19 +252,19 @@ describe('index', () => {
   });
 
   it('should correctly append', () => {
-    const payload = new Payload("test");
+    const payload = new Payload('test');
     expect(payload.nextRequest()).toBeUndefined();
 
-    payload.addRequest("test2");
-    expect(payload.nextRequest()).toBe("test2");
+    payload.addRequest('test2');
+    expect(payload.nextRequest()).toBe('test2');
 
-    payload.addRequest("test3");
-    expect(payload.nextRequest()).toBe("test2");
+    payload.addRequest('test3');
+    expect(payload.nextRequest()).toBe('test2');
 
     // Needed because it sets the service...
-    payload.validateAndSet("service");
+    payload.validateAndSet('service');
 
-    payload.decorate("test2", {});
-    expect(payload.nextRequest()).toBe("test3");
+    payload.decorate('test2', {});
+    expect(payload.nextRequest()).toBe('test3');
   });
 });
