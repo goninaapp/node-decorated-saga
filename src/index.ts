@@ -255,6 +255,10 @@ export class Handler {
     }
 
     const res = await provider(payload);
+    if (!res) {
+      return;
+    }
+
     if (res instanceof Error) {
       console.log('provider error', res);
       return new HandlerError(rec.kinesis.sequenceNumber, res.message);
