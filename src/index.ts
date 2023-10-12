@@ -52,7 +52,6 @@ export class Handler {
   private readonly sqs: SQS;
   private handlers: Map<string, PayloadHandler>;
   private providers: Map<string, ProviderHandler>;
-  private rawHandler?: RawHandler;
   private apiGatewayHandler?: ApiGatewayHandler;
 
   constructor(serviceName: string) {
@@ -78,11 +77,6 @@ export class Handler {
   public registerApiGatewayHandler(handler: ApiGatewayHandler) {
     debug('registerApiGatewayHandler');
     this.apiGatewayHandler = handler;
-  }
-
-  public registerRawHandler(handler: RawHandler) {
-    debug('registerRawHandler');
-    this.rawHandler = handler;
   }
 
   public async handler(
@@ -150,25 +144,7 @@ export class Handler {
       return res ? raw.messageId : undefined;
     }
 
-    return this.handleRaw(raw);
-  }
-
-  private async handleRaw(raw: RawPayload): Promise<string | undefined> {
-    debug('handleRaw', raw);
-    debug('this', this);
-
-    if (!this.rawHandler) {
-      debug('no handler found', raw);
-      return;
-    }
-
-    try {
-      await this.rawHandler(raw.payload);
-      return;
-    } catch (e: any) {
-      error('rawHandler error caught', e);
-      return raw.messageId;
-    }
+    return;
   }
 
   private async handleFailedBatch(
