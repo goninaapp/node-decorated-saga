@@ -2,10 +2,8 @@ import {
   APIGatewayProxyEventV2,
   APIGatewayProxyResultV2,
   KinesisStreamBatchItemFailure,
-  KinesisStreamBatchResponse,
   KinesisStreamEvent,
   SNSEvent,
-  SQSBatchItemFailure,
   SQSEvent,
 } from 'aws-lambda';
 import {

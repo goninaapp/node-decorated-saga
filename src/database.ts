@@ -77,7 +77,7 @@ export class Database {
         ca: res.data,
       };
     } catch (e) {
-      error(e);
+      error("failed to fetch RDS CA bundle, using 'rejectUnauthorized: false'");
 
       ssl = {
         rejectUnauthorized: false,
@@ -93,7 +93,6 @@ export class Database {
       ssl,
       connectionTimeoutMillis: 3000,
       query_timeout: 3000,
-      statement_timeout: 3000,
     });
 
     await cl.connect();
