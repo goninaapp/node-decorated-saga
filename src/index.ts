@@ -4,282 +4,320 @@ import {
   KinesisStreamBatchItemFailure,
   KinesisStreamBatchResponse,
   KinesisStreamEvent,
-  KinesisStreamRecord,
+  SNSEvent,
   SQSBatchItemFailure,
   SQSEvent,
-  SQSRecord,
 } from 'aws-lambda';
 import {
+  GetRecordsCommand,
+  GetShardIteratorCommand,
   Kinesis,
   PutRecordCommand,
   PutRecordCommandInput,
 } from '@aws-sdk/client-kinesis';
-import { v4 as uuidv4 } from 'uuid';
+import {
+  SendMessageBatchCommand,
+  SendMessageBatchRequest,
+  SendMessageBatchRequestEntry,
+  SQS,
+} from '@aws-sdk/client-sqs';
+import { extract, RawPayload } from './payload';
+import debugg from 'debug';
 
-export class Decoration {
-  type: string;
-  service: string;
-  timestamp: number;
-  payload: any;
+const error = debugg('error');
+const debug = debugg('debug');
+debug.log = console.log.bind(console);
 
-  constructor(type?: string, service?: string, payload?: any) {
-    this.type = type || '';
-    this.service = service || '';
-    this.timestamp = Date.now();
-    this.payload = payload || {};
-  }
-}
+export type PayloadHandler = (
+  payload: Payload,
+  alreadyProcessed: boolean,
+) => Promise<Result | undefined>;
+export type ProviderHandler = (payload: Payload) => Promise<Object | undefined>;
+export type RawHandler = (payload: any) => Promise<void>;
 
-export class Payload {
-  version: string;
-  correlationId: string;
-  publishTime: number;
-  saga: string;
-  context: Decoration;
-  requested: string[];
-  decorations: Decoration[];
-  private _service: string;
-
-  constructor(saga?: string, context?: Decoration) {
-    this.version = 'v1';
-    this.correlationId = uuidv4();
-    this.publishTime = Date.now();
-
-    this.saga = saga || '';
-    this.context = context || new Decoration();
-
-    this.requested = [];
-    this.decorations = [];
-
-    this._service = '';
-  }
-
-  public addRequest(type: string) {
-    if (!this.requested.includes(type)) {
-      this.requested.push(type);
-    }
-  }
-
-  static fromJSON(json: string): Payload {
-    const payload = JSON.parse(json);
-    const p = new Payload(payload.saga, payload.context);
-    p.version = payload.version || 'v0';
-    p.correlationId = payload.correlationId || uuidv4();
-    p.publishTime = payload.publishTime || Date.now();
-    p.requested = payload.requested || [];
-    p.decorations = payload.decorations || [];
-
-    return p;
-  }
-
-  validateAndSet(service: string) {
-    this._service = service;
-
-    if (this.version !== 'v1') {
-      return false;
-    }
-
-    if (this.context.service === service && this.nextRequest() !== undefined) {
-      return false;
-    }
-
-    return !this.decorations.some((d) => d.service === service);
-  }
-
-  decorate(type: string, payload: any) {
-    if (!this._service || this._service === '') {
-      throw new Error('service name not set');
-    }
-
-    this.decorations = this.decorations || [];
-    this.decorations.push(new Decoration(type, this._service, payload));
-  }
-
-  hasDecoration(type: string) {
-    return this.decorations.some((d) => d.type === type);
-  }
-
-  wasProcessedByService(service: string) {
-    return (
-      this.context.service == service ||
-      (this.decorations || []).some((d) => d.service === service)
-    );
-  }
-
-  getDecoration(type?: string) {
-    if (this.context.type === type) {
-      return this.context;
-    }
-
-    return (this.decorations || []).find((d) => d.type === type);
-  }
-
-  nextRequest(): string | undefined {
-    return this.requested.find((r) => !this.hasDecoration(r));
-  }
-
-  stringify(): string {
-    return JSON.stringify(this, (key, value) => {
-      if (key.startsWith('_')) {
-        return undefined;
-      }
-      return value;
-    });
-  }
-}
-
-export type RecordHandler = (payload: Payload) => Promise<Error | undefined>;
-export type SQSHandler = (payload: SQSRecord) => Promise<Error | undefined>;
-export type ProviderHandler = (payload: Payload) => Promise<any>;
 export type ApiGatewayHandler = (
   payload: APIGatewayProxyEventV2,
 ) => Promise<APIGatewayProxyResultV2>;
 
-class HandlerError extends Error {
-  public readonly sequenceNumber: string;
+import { Decoration, FailedKinesisBatch, Payload, Result } from './types';
+export { Payload, Decoration, Result };
 
-  constructor(sequenceNumber: string, message: string) {
-    super(message);
-    this.sequenceNumber = sequenceNumber;
-  }
-}
+import { deploy } from './cdk';
+export { deploy };
 
 export class Handler {
   private readonly serviceName: string;
   private readonly kinesis: Kinesis;
-  private handlers: Map<string, RecordHandler>;
+  private readonly streamName: string;
+  private readonly sqs: SQS;
+  private handlers: Map<string, PayloadHandler>;
   private providers: Map<string, ProviderHandler>;
-  private sqsHandler?: SQSHandler;
+  private rawHandler?: RawHandler;
   private apiGatewayHandler?: ApiGatewayHandler;
 
   constructor(serviceName: string) {
     this.serviceName = serviceName;
-    this.handlers = new Map<string, RecordHandler>();
+    this.handlers = new Map<string, PayloadHandler>();
     this.providers = new Map<string, ProviderHandler>();
 
     this.kinesis = new Kinesis();
+    this.streamName = process.env.KINESIS_STREAM_NAME || 'message-bus';
+    this.sqs = new SQS();
   }
 
-  public registerHandler(saga: string, handler: RecordHandler) {
+  public registerHandler(saga: string, handler: PayloadHandler) {
+    debug('registerHandler', saga);
     this.handlers.set(saga, handler);
   }
 
   public registerProvider(provider: string, handler: ProviderHandler) {
+    debug('registerProvider', provider);
     this.providers.set(provider, handler);
   }
 
   public registerApiGatewayHandler(handler: ApiGatewayHandler) {
+    debug('registerApiGatewayHandler');
     this.apiGatewayHandler = handler;
   }
 
-  public registerSQSHandler(handler: SQSHandler) {
-    this.sqsHandler = handler;
+  public registerRawHandler(handler: RawHandler) {
+    debug('registerRawHandler');
+    this.rawHandler = handler;
   }
 
   public async handler(
-    request: KinesisStreamEvent | SQSEvent | APIGatewayProxyEventV2,
+    request: KinesisStreamEvent | SQSEvent | SNSEvent | APIGatewayProxyEventV2,
   ): Promise<
     KinesisStreamBatchResponse | SQSBatchItemFailure | APIGatewayProxyResultV2
   > {
-    if (!request.hasOwnProperty('Records')) {
-      if (!this.apiGatewayHandler) {
-        throw new Error('No ApiGateway handler registered');
-      }
+    debug('handler', JSON.stringify(request));
 
-      return await this.apiGatewayHandler(request as APIGatewayProxyEventV2);
+    if (!request.hasOwnProperty('Records')) {
+      return this.handleApiGatewayRequest(request as APIGatewayProxyEventV2);
     }
 
-    request = request as KinesisStreamEvent | SQSEvent;
+    request = request as KinesisStreamEvent | SQSEvent | SNSEvent;
+    const records = extract(request);
+
     const results = await Promise.all(
-      request.Records.map(this.handleRecord.bind(this)),
+      records.map(this.handleRecord.bind(this)),
     );
 
-    const filtered = results.filter((r) => r) as HandlerError[];
+    const filtered = results.filter((r) => r) as string[];
     const batchItemFailures: KinesisStreamBatchItemFailure[] = filtered.map(
-      (r) => ({
-        itemIdentifier: r.sequenceNumber,
+      (itemIdentifier) => ({
+        itemIdentifier,
       }),
     );
+
+    debug('batchItemFailures', batchItemFailures);
 
     return { batchItemFailures };
   }
 
-  async handleRecord(
-    rec: KinesisStreamRecord | SQSRecord,
-  ): Promise<HandlerError | undefined> {
-    if (rec.hasOwnProperty('messageId')) {
-      rec = rec as SQSRecord;
+  private async handleApiGatewayRequest(
+    request: APIGatewayProxyEventV2,
+  ): Promise<APIGatewayProxyResultV2> {
+    debug('handleApiGatewayRequest', request);
+    debug('this', this);
 
-      if (!this.sqsHandler) {
-        return new HandlerError(rec.messageId, 'No SQS handler registered');
-      }
+    if (!this.apiGatewayHandler) {
+      error('apiGatewayHandler not registered');
+      return { statusCode: 500, body: 'not implemented' };
+    }
 
-      const res = await this.sqsHandler(JSON.parse(rec.body));
-      if (res) {
-        console.log('handler error', res);
-        return new HandlerError(rec.messageId, res.message);
-      }
+    try {
+      return await this.apiGatewayHandler(request as APIGatewayProxyEventV2);
+    } catch (e: any) {
+      error('apiGatewayHandler error', e);
+      return { statusCode: 500, body: 'Internal Server Error' };
+    }
+  }
 
+  private async handleRecord(raw: RawPayload): Promise<string | undefined> {
+    debug('handleRecord', raw);
+    debug('this', this);
+
+    const failedBatch = FailedKinesisBatch.fromJSON(raw.payload);
+    if (failedBatch) {
+      const res = await this.handleFailedBatch(failedBatch);
+      return res ? raw.messageId : undefined;
+    }
+
+    const payload = Payload.fromJSON(raw.payload);
+    if (payload) {
+      const res = await this.handlePayload(payload);
+      return res ? raw.messageId : undefined;
+    }
+
+    return this.handleRaw(raw);
+  }
+
+  private async handleRaw(raw: RawPayload): Promise<string | undefined> {
+    debug('handleRaw', raw);
+    debug('this', this);
+
+    if (!this.rawHandler) {
+      debug('no handler found', raw);
       return;
     }
 
-    rec = rec as KinesisStreamRecord;
-
-    const data = Buffer.from(rec.kinesis.data, 'base64').toString('utf-8');
-    const payload = Payload.fromJSON(data);
-
-    // We validate that the service has not processed this message before and that the version is correct.
-    if (!payload.validateAndSet(this.serviceName)) {
+    try {
+      await this.rawHandler(raw.payload);
       return;
+    } catch (e: any) {
+      error('rawHandler error caught', e);
+      return raw.messageId;
     }
+  }
+
+  private async handleFailedBatch(
+    failedBatch: FailedKinesisBatch,
+  ): Promise<Error | undefined> {
+    debug('handleFailedBatch', failedBatch);
+    debug('this', this);
+
+    const { ShardIterator } = await this.kinesis.send(
+      new GetShardIteratorCommand({
+        ShardId: failedBatch.shardId,
+        ShardIteratorType: 'AT_SEQUENCE_NUMBER',
+        StreamARN: failedBatch.streamArn,
+        StartingSequenceNumber: failedBatch.startSequenceNumber,
+      }),
+    );
+
+    const records = await this.kinesis.send(
+      new GetRecordsCommand({
+        ShardIterator,
+        Limit: failedBatch.batchSize,
+      }),
+    );
+
+    debug('records', records);
+
+    let batch: SendMessageBatchRequestEntry[] = [];
+    for (const rec of records.Records || []) {
+      if (!rec.Data) {
+        continue;
+      }
+
+      if (!process.env.SQS_QUEUE_URL) {
+        error('no SQS_QUEUE_URL env var');
+        return new Error('no SQS_QUEUE_URL env var');
+      }
+
+      const decoder = new TextDecoder('utf-8');
+      batch.push({
+        Id: rec.SequenceNumber || '',
+        MessageBody: decoder.decode(rec.Data),
+      });
+
+      if (rec.SequenceNumber == failedBatch.endSequenceNumber) {
+        break;
+      }
+    }
+
+    while (batch.length > 0) {
+      const slice = batch.splice(0, 5);
+
+      try {
+        const cmd: SendMessageBatchRequest = {
+          QueueUrl: process.env.SQS_QUEUE_URL || '',
+          Entries: slice,
+        };
+
+        debug('sending batch', cmd);
+
+        const res = await this.sqs.send(new SendMessageBatchCommand(cmd));
+        if (res.Failed && res.Failed.length > 0) {
+          error('failed to send message to SQS', res);
+          return new Error('failed to send message to SQS');
+        }
+      } catch (e: any) {
+        error('failed to send message to SQS', e);
+        return new Error('failed to send message to SQS');
+      }
+    }
+  }
+
+  private async handlePayload(payload: Payload): Promise<Error | undefined> {
+    debug('handlePayload', payload);
+    debug('this', this);
 
     const handler = this.handlers.get(payload.saga);
     if (handler) {
-      const res = await handler(payload);
+      try {
+        const res = await handler(
+          payload,
+          payload.processedByService(this.serviceName),
+        );
+        if (res) {
+          await this.decorate(payload, res);
+        }
+
+        return;
+      } catch (e: any) {
+        error('handler error', e);
+        return new Error('handler failed');
+      }
+    }
+
+    const next = payload.next() || '';
+    const provider = this.providers.get(next);
+    if (next === '' || !provider) {
+      return;
+    }
+
+    try {
+      const res = await provider(payload);
       if (res) {
-        console.log('handler error', res);
-        return new HandlerError(rec.kinesis.sequenceNumber, res.message);
+        await this.decorate(payload, new Result(next, res));
       }
 
       return;
+    } catch (e: any) {
+      error('handler error', e);
+      return new Error('handler failed');
     }
-
-    const next = payload.nextRequest();
-    if (!next) {
-      return;
-    }
-
-    const provider = this.providers.get(next);
-    if (!provider) {
-      return;
-    }
-
-    const res = await provider(payload);
-    if (!res) {
-      return;
-    }
-
-    if (res instanceof Error) {
-      console.log('provider error', res);
-      return new HandlerError(rec.kinesis.sequenceNumber, res.message);
-    }
-
-    payload.decorate(next, res);
-    await this.publish(payload);
-
-    return;
   }
 
-  public async publish(payload: Payload) {
+  public async publish(saga: string, data: Object, requests?: string[]) {
+    debug('publish', saga, data, requests);
+    debug('this', this);
+
+    const payload = new Payload(saga, data);
+
+    for (const req of requests || []) {
+      payload.addRequest(req);
+    }
+
+    return this.publishInternal(payload);
+  }
+
+  private async decorate(payload: Payload, result: Result) {
+    debug('decorate', payload, result);
+    debug('this', this);
+
+    payload.decorations.push(
+      new Decoration(result.type, this.serviceName, result.payload),
+    );
+
+    return this.publishInternal(payload);
+  }
+
+  private async publishInternal(payload: Payload) {
+    debug('publishInternal', payload);
+    debug('this', this);
+
     const enc = new TextEncoder();
 
     const input: PutRecordCommandInput = {
       // PutRecordInput
-      StreamName: 'message-bus',
-      Data: enc.encode(payload.stringify()),
+      StreamName: this.streamName,
+      Data: enc.encode(JSON.stringify(payload)),
       PartitionKey: payload.saga,
     };
 
-    return await this.kinesis.send(new PutRecordCommand(input));
+    return this.kinesis.send(new PutRecordCommand(input));
   }
 }
