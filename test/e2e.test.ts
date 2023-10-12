@@ -231,6 +231,49 @@ describe('e2e', () => {
     expect(parsed.requests).toStrictEqual([]);
     expect(parsed.decorations.length).toBe(0);
   }, 60000);
+
+  it('should be possible to send raw messages via SQS', async () => {
+    const id = uuidv4();
+
+    const payload = { id, message: 'raw.success' };
+
+    await sqs.send(new SendMessageCommand({
+      MessageBody: JSON.stringify(payload),
+      QueueUrl: queueUrl
+    }));
+
+    const response = await getSqsRecord(sqs, responseQueueUrl, 50000);
+    expect(response).toBeDefined();
+
+    const parsed = JSON.parse(response);
+    expect(parsed).toStrictEqual(payload);
+  });
+
+  it('should be possible to send raw messages via SQS with error', async () => {
+    const id = uuidv4();
+
+    const payload = { id, message: 'raw.error' };
+
+    await sqs.send(new SendMessageCommand({
+      MessageBody: JSON.stringify(payload),
+      QueueUrl: queueUrl
+    }));
+
+    const response = await getSqsRecord(sqs, requestDlqUrl, 50000);
+
+    const parsed = JSON.parse(response);
+    expect(parsed).toStrictEqual(payload);
+  }, 60000);
+
+  it('should process function url requests', async () => {
+    const id = uuidv4();
+    const res = await axios.post(funcUrl, {
+      id,
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.data).toStrictEqual({ id });
+  });
 });
 
 async function sleep(ms: number) {

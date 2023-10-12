@@ -27,6 +27,19 @@ h.registerHandler('saga.error', async (payload: Payload, alreadyProcessed: boole
   throw new Error('saga.error');
 });
 
+h.registerRawHandler(async (payload: any) => {
+  console.log('rawHandler', payload);
+  const data = JSON.parse(payload);
+  if (data.message !== 'raw.success') {
+    throw new Error('raw.error');
+  }
+
+  await sqs.send(new SendMessageCommand({
+    QueueUrl: process.env.RESPONSE_QUEUE_URL,
+    MessageBody: payload,
+  }));
+});
+
 h.registerApiGatewayHandler(async (event: APIGatewayProxyEventV2) => {
   console.log('apiGatewayHandler', event);
 
