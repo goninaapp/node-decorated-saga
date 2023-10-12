@@ -1,5 +1,9 @@
 import { v4 as uuidv4 } from 'uuid';
 
+export interface Keyable {
+  [key: string]: any;
+}
+
 export class Result {
   type: string;
   payload: Object;
@@ -14,9 +18,9 @@ export class Decoration {
   type: string;
   service: string;
   timestamp: number;
-  payload: Object;
+  payload: Keyable;
 
-  constructor(type?: string, service?: string, payload?: any) {
+  constructor(type?: string, service?: string, payload?: Object) {
     this.type = type || '';
     this.service = service || '';
     this.timestamp = Date.now();
@@ -29,7 +33,7 @@ export class Payload {
   correlationId: string;
   publishTime: number;
   saga: string;
-  context: Object;
+  context: Keyable;
   requests: string[];
   decorations: Decoration[];
 

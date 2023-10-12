@@ -40,10 +40,16 @@ export type ApiGatewayHandler = (
 ) => Promise<APIGatewayProxyResultV2>;
 
 import { Decoration, FailedKinesisBatch, Payload, Result } from './types';
+
 export { Payload, Decoration, Result };
 
 import { deploy } from './cdk';
+
 export { deploy };
+
+import { Database } from './database';
+
+export { Database };
 
 export class Handler {
   private readonly serviceName: string;
@@ -85,11 +91,7 @@ export class Handler {
     this.rawHandler = handler;
   }
 
-  public async handler(
-    request: KinesisStreamEvent | SQSEvent | SNSEvent | APIGatewayProxyEventV2,
-  ): Promise<
-    KinesisStreamBatchResponse | SQSBatchItemFailure | APIGatewayProxyResultV2
-  > {
+  public async handler(request: any): Promise<any> {
     debug('handler', JSON.stringify(request));
 
     if (!request.hasOwnProperty('Records')) {
