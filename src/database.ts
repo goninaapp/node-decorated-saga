@@ -35,7 +35,7 @@ export class Database {
     this.username = username;
     this.region = region;
 
-    this.connect();
+    this.connect().catch(error);
   }
 
   public async getClient(): Promise<Client> {
@@ -43,7 +43,13 @@ export class Database {
       return this.client;
     }
 
-    await this.connect();
+    try {
+      await this.connect();
+    } catch (e) {
+      error(e);
+
+      throw new Error('could not connect to database');
+    }
 
     if (!this.client) {
       throw new Error('Could not connect to database');
@@ -63,34 +69,15 @@ export class Database {
       username: this.username,
     });
 
-    let ssl: ConnectionOptions = {};
-    try {
-      const res = await axios.get(
-        `https://truststore.pki.rds.amazonaws.com/${this.region}/${this.region}-bundle.pem`,
-        {
-          timeout: 1000,
-          responseType: 'text',
-        },
-      );
-
-      ssl = {
-        ca: res.data,
-      };
-    } catch (e) {
-      error("failed to fetch RDS CA bundle, using 'rejectUnauthorized: false'");
-
-      ssl = {
-        rejectUnauthorized: false,
-      };
-    }
-
     const cl = new Client({
       host: this.host,
       port: this.port,
       database: this.database,
       user: this.username,
       password,
-      ssl,
+      ssl: {
+        rejectUnauthorized: false,
+      },
       connectionTimeoutMillis: 3000,
       query_timeout: 3000,
     });
@@ -99,7 +86,8 @@ export class Database {
 
     this.client = cl;
     this.client.on('end', () => {
-      delete this.client;
+      console.log('db closed');
+      this.client = undefined;
     });
   }
 }
