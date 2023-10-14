@@ -41,9 +41,9 @@ import { Decoration, FailedKinesisBatch, Payload, Result } from './types';
 
 export { Payload, Decoration, Result };
 
-import { deploy } from './cdk';
+import { DecoratedSagaInfrastructure } from './cdk';
 
-export { deploy };
+export { DecoratedSagaInfrastructure };
 
 import { Database } from './database';
 
@@ -186,6 +186,8 @@ export class Handler {
       }),
     );
 
+    console.log('ShardIterator', ShardIterator);
+
     const records = await this.kinesis.send(
       new GetRecordsCommand({
         ShardIterator,
@@ -238,6 +240,8 @@ export class Handler {
         return new Error('failed to send message to SQS');
       }
     }
+
+    return;
   }
 
   private async handlePayload(payload: Payload): Promise<Error | undefined> {

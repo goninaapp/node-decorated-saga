@@ -2,7 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { Stream } from 'aws-cdk-lib/aws-kinesis';
-import { deploy } from '../src';
+import { DecoratedSagaInfrastructure } from "../src";
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import { FunctionUrlAuthType } from "aws-cdk-lib/aws-lambda";
@@ -42,7 +42,12 @@ export class TestStack extends cdk.Stack {
       },
     });
 
-    deploy(this, props?.env || {}, fn, stream, 1, true);
+    new DecoratedSagaInfrastructure(this, 'DecoratedSaga', {
+      fn,
+      stream,
+      batchSize: 1,
+      debug: true,
+    });
 
     fn.addEventSource(
       new SqsEventSource(queue, {

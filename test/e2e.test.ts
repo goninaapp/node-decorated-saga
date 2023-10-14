@@ -75,7 +75,7 @@ describe('e2e', () => {
 
     const sqsList = await sqs.send(new ListQueuesCommand({
       // ListQueuesRequest
-      QueueNamePrefix: 'DecoratedSagaTestStack-Dlq',
+      QueueNamePrefix: 'DecoratedSagaTestStack-DecoratedSagaDlq',
       MaxResults: 1,
     }));
 
