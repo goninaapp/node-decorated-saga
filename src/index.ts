@@ -119,7 +119,6 @@ export class Handler {
     request: APIGatewayProxyEventV2,
   ): Promise<APIGatewayProxyResultV2> {
     debug('handleApiGatewayRequest', request);
-    debug('this', this);
 
     if (!this.apiGatewayHandler) {
       error('apiGatewayHandler not registered');
@@ -136,7 +135,6 @@ export class Handler {
 
   private async handleRecord(raw: RawPayload): Promise<string | undefined> {
     debug('handleRecord', raw);
-    debug('this', this);
 
     const failedBatch = FailedKinesisBatch.fromJSON(raw.payload);
     if (failedBatch) {
@@ -155,7 +153,6 @@ export class Handler {
 
   private async handleRaw(raw: RawPayload): Promise<string | undefined> {
     debug('handleRaw', raw);
-    debug('this', this);
 
     if (!this.rawHandler) {
       debug('no handler found', raw);
@@ -175,7 +172,6 @@ export class Handler {
     failedBatch: FailedKinesisBatch,
   ): Promise<Error | undefined> {
     debug('handleFailedBatch', failedBatch);
-    debug('this', this);
 
     const { ShardIterator } = await this.kinesis.send(
       new GetShardIteratorCommand({
@@ -246,7 +242,6 @@ export class Handler {
 
   private async handlePayload(payload: Payload): Promise<Error | undefined> {
     debug('handlePayload', payload);
-    debug('this', this);
 
     const handler = this.handlers.get(payload.saga);
     if (handler) {
@@ -287,7 +282,6 @@ export class Handler {
 
   public async publish(saga: string, data: Object, requests?: string[]) {
     debug('publish', saga, data, requests);
-    debug('this', this);
 
     const payload = new Payload(saga, data);
 
@@ -300,7 +294,6 @@ export class Handler {
 
   private async decorate(payload: Payload, result: Result) {
     debug('decorate', payload, result);
-    debug('this', this);
 
     payload.decorations.push(
       new Decoration(result.type, this.serviceName, result.payload),
@@ -311,7 +304,6 @@ export class Handler {
 
   private async publishInternal(payload: Payload) {
     debug('publishInternal', payload);
-    debug('this', this);
 
     const enc = new TextEncoder();
 
