@@ -1,6 +1,6 @@
 {
   "name": "@goninaapp/decorated-saga",
-  "version": "2.0.7",
+  "version": "2.0.8",
   "description": "This package provides a minimal framework to implement the decorated saga pattern based on AWS Kinesis and AWS Lambda.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
