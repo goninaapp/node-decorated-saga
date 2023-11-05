@@ -22,6 +22,20 @@ import {
 import { extract, RawPayload } from './payload';
 import debugg from 'debug';
 
+import { Decoration, FailedKinesisBatch, Payload, Result } from './types';
+import { DecoratedSagaInfrastructure } from './cdk';
+import { Database } from './database';
+import { DecoratedSagaTransport } from './transport';
+
+export {
+  Payload,
+  Decoration,
+  Result,
+  DecoratedSagaInfrastructure,
+  Database,
+  DecoratedSagaTransport,
+};
+
 const error = debugg('error');
 const debug = debugg('debug');
 debug.log = console.log.bind(console);
@@ -36,18 +50,6 @@ export type RawHandler = (payload: any) => Promise<void>;
 export type ApiGatewayHandler = (
   payload: APIGatewayProxyEventV2,
 ) => Promise<APIGatewayProxyResultV2>;
-
-import { Decoration, FailedKinesisBatch, Payload, Result } from './types';
-
-export { Payload, Decoration, Result };
-
-import { DecoratedSagaInfrastructure } from './cdk';
-
-export { DecoratedSagaInfrastructure };
-
-import { Database } from './database';
-
-export { Database };
 
 export class Handler {
   private readonly serviceName: string;
