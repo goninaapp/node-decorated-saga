@@ -6,6 +6,8 @@ import {
   NestModule,
 } from '@nestjs/common';
 import {
+  Ctx,
+  Payload as NestPayload,
   EventPattern,
   MessagePattern,
   MicroserviceOptions,
@@ -16,7 +18,6 @@ import { KinesisStreamRecord } from 'aws-lambda';
 import { v4 as uuidv4 } from 'uuid';
 import { Payload, Result } from './types';
 import { Handler } from './index';
-import SpyInstance = jest.SpyInstance;
 
 describe('transport', () => {
   let controller: TestController;
@@ -102,6 +103,28 @@ describe('transport', () => {
     expect(result).toStrictEqual({ batchItemFailures: [] });
     expect(mock).toHaveBeenCalled();
   });
+
+  it('should allow to receive raw messages', async () => {
+    const id = uuidv4();
+    const payload = { id };
+
+    const data = createKinesisRecord(id, JSON.stringify(payload));
+
+    let received: any[] = [];
+    const mock = jest
+      .spyOn(Handler.prototype as any, 'publish')
+      .mockImplementation((saga: any, payload: any) => {
+        received = [saga, payload.id];
+      });
+
+    const result = await transport.handler.handler({
+      Records: [data],
+    });
+
+    expect(result).toStrictEqual({ batchItemFailures: [] });
+    expect(mock).toHaveBeenCalled();
+    expect(received).toStrictEqual(['raw', id]);
+  });
 });
 
 @Controller()
@@ -122,6 +145,12 @@ class TestController {
       type: 'event.response',
       payload: data.context,
     };
+  }
+
+  @EventPattern('raw')
+  async rawEvent(@NestPayload() data: string, @Ctx() handler: Handler) {
+    console.log(data);
+    await handler.publish('raw', JSON.parse(data));
   }
 }
 

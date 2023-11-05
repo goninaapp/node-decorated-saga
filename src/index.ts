@@ -88,6 +88,11 @@ export class Handler {
 
   public registerRawHandler(handler: RawHandler) {
     debug('registerRawHandler');
+
+    if (this.rawHandler) {
+      throw new Error('Raw handler already registered');
+    }
+
     this.rawHandler = handler;
   }
 

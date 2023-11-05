@@ -1,4 +1,8 @@
-import { CustomTransportStrategy, Server } from '@nestjs/microservices';
+import {
+  CustomTransportStrategy,
+  MessageHandler,
+  Server,
+} from '@nestjs/microservices';
 import { Handler, Result } from './index';
 import { isObservable } from 'rxjs';
 
@@ -19,11 +23,11 @@ export class DecoratedSagaTransport
    */
   listen(callback: () => void) {
     this.messageHandlers.forEach((handler, saga) => {
-      if (handler.isEventHandler) {
+      if (handler.isEventHandler && saga !== 'raw') {
         this.handler.registerHandler(
           saga,
           async (payload: any): Promise<Result | undefined> => {
-            const result = await handler(payload);
+            const result = await handler(payload, this.handler);
 
             if (isObservable(result)) {
               throw new Error('Observable not supported');
@@ -43,11 +47,15 @@ export class DecoratedSagaTransport
             throw new Error('Invalid result');
           },
         );
+      } else if (handler.isEventHandler && saga === 'raw') {
+        this.handler.registerRawHandler(async (payload: any) => {
+          await handler(payload, this.handler);
+        });
       } else {
         this.handler.registerProvider(
           saga,
           async (payload: any): Promise<Object | undefined> => {
-            const result = await handler(payload);
+            const result = await handler(payload, this.handler);
 
             if (isObservable(result)) {
               throw new Error('Observable not supported');
@@ -62,8 +70,5 @@ export class DecoratedSagaTransport
     callback();
   }
 
-  /**
-   * This method is triggered on application shutdown.
-   */
   close() {}
 }
