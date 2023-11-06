@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@aws-sdk/client-lambda": "^3.441.0",
-    "@aws-sdk/credential-providers": "^3.438.0",
+    "@aws-sdk/credential-providers": "^3.441.0",
     "@nestjs/testing": "^10.2.7",
     "@types/aws-lambda": "^8.10.122",
     "@types/debug": "^4.1.9",

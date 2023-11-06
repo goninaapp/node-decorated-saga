@@ -2,7 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { Stream } from 'aws-cdk-lib/aws-kinesis';
-import { DecoratedSagaInfrastructure } from "../src";
+import { DecoratedSagaInfrastructure } from "../src/cdk";
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import { FunctionUrlAuthType } from "aws-cdk-lib/aws-lambda";
