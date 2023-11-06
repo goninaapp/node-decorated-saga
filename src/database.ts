@@ -1,7 +1,5 @@
 import { Client } from 'pg';
-import { Signer } from 'aws-sdk/clients/rds';
-import axios from 'axios';
-import { ConnectionOptions } from 'tls';
+import { Signer } from '@aws-sdk/rds-signer';
 import debugg from 'debug';
 
 const error = debugg('error');
@@ -13,6 +11,7 @@ export class Database {
   private readonly database: string;
   private readonly username: string;
   private readonly region: string;
+  private readonly signer: Signer;
 
   constructor(
     host: string,
@@ -34,6 +33,13 @@ export class Database {
     this.database = database;
     this.username = username;
     this.region = region;
+
+    this.signer = new Signer({
+      region: this.region,
+      hostname: this.host,
+      port: this.port,
+      username: this.username,
+    });
 
     this.connect().catch(error);
   }
@@ -59,15 +65,7 @@ export class Database {
   }
 
   private async connect() {
-    const signer = new Signer({
-      region: this.region,
-    });
-
-    const password = signer.getAuthToken({
-      hostname: this.host,
-      port: this.port,
-      username: this.username,
-    });
+    const password = await this.signer.getAuthToken();
 
     const cl = new Client({
       host: this.host,

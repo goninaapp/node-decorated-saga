@@ -23,18 +23,10 @@ import { extract, RawPayload } from './payload';
 import debugg from 'debug';
 
 import { Decoration, FailedKinesisBatch, Payload, Result } from './types';
-import { DecoratedSagaInfrastructure } from './cdk';
 import { Database } from './database';
 import { DecoratedSagaTransport } from './transport';
 
-export {
-  Payload,
-  Decoration,
-  Result,
-  DecoratedSagaInfrastructure,
-  Database,
-  DecoratedSagaTransport,
-};
+export { Payload, Decoration, Result, Database, DecoratedSagaTransport };
 
 const error = debugg('error');
 const debug = debugg('debug');
