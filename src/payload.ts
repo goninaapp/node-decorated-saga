@@ -86,8 +86,14 @@ function deepExtract(input: any): string {
   if (hasKeys(event, 'kinesis')) {
     // Kinesis
     event = event as KinesisStreamRecord;
-    const data = Buffer.from(event.kinesis.data, 'base64').toString('utf-8');
-    return deepExtract(data);
+    const data = Buffer.from(event.kinesis.data, 'base64');
+
+    let res = event.kinesis.data;
+    if (isUtf8(data)) {
+      res = data.toString('utf-8');
+    }
+
+    return deepExtract(res);
   }
 
   if (hasKeys(event, 'Sns')) {
@@ -102,4 +108,13 @@ function deepExtract(input: any): string {
   }
 
   return input;
+}
+
+function isUtf8(buffer: Buffer): boolean {
+  try {
+    new TextDecoder('utf8', { fatal: true }).decode(buffer);
+    return true;
+  } catch (e) {
+    return false;
+  }
 }

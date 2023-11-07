@@ -122,4 +122,14 @@ describe('payload', () => {
       new RawPayload('4', payload2),
     ]);
   });
+
+  it('should return non-utf8 data as base64', () => {
+    const payload =
+      '4AEA6u67gYPet4e+tI1xbGRiU3RyZWFtQXJuinJlY29yZFR5cGWHcGF5bG9hZI6RY29udHJvbFJlY29yZFR5cGXe44qOzGFybjphd3M6cWxkYjpldS1jZW50cmFsLTE6NDkyOTgwMjU0NDA5OnN0cmVhbS9iaWxsaW5nLzJwZHc3bTh2NnhaNEFyYmdKekdleGeLh0NPTlRST0yM2Y2HQ1JFQVRFRA==';
+
+    const req = createKinesisRecord('1', payload);
+    const res = extract({ Records: [req] });
+
+    expect(res).toEqual([new RawPayload('1', payload)]);
+  });
 });
