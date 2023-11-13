@@ -1,8 +1,4 @@
-import {
-  CustomTransportStrategy,
-  MessageHandler,
-  Server,
-} from '@nestjs/microservices';
+import { CustomTransportStrategy, Server } from '@nestjs/microservices';
 import { Handler, Result } from './index';
 import { isObservable } from 'rxjs';
 
