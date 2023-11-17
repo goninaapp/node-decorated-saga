@@ -125,7 +125,7 @@
     "@smithy/util-utf8" "^2.0.2"
     tslib "^2.5.0"
 
-"@aws-sdk/client-kinesis@^3.449.0":
+"@aws-sdk/client-kinesis@^3.451.0":
   version "3.451.0"
   resolved "https://registry.yarnpkg.com/@aws-sdk/client-kinesis/-/client-kinesis-3.451.0.tgz#4ee6fbe2629dd331d52316b1d1137f0b2c403f62"
   integrity sha512-Wz2mQCmCWbcgtOwY7Rchyi2sVUEnqMPrQNnpovXZ9gceoVPyl+IHzHCFoqD+6tFrnDMOUOYG31gW4xz82OrUoQ==
@@ -224,7 +224,7 @@
     "@smithy/util-waiter" "^2.0.13"
     tslib "^2.5.0"
 
-"@aws-sdk/client-sqs@^3.428.0":
+"@aws-sdk/client-sqs@^3.451.0":
   version "3.451.0"
   resolved "https://registry.yarnpkg.com/@aws-sdk/client-sqs/-/client-sqs-3.451.0.tgz#9648881b8f1a9cb666c5f0fcb2873cb667d047c3"
   integrity sha512-xiDTC1iGMV+GZGLuudEMjJGhvjeMHmeTxvqJFEK78fzPxEUoUsTvA9i3qek2b4NM6fFWE7Ef0isYCAJW0jmdaA==
@@ -1395,7 +1395,7 @@
     iterare "1.2.1"
     tslib "2.6.2"
 
-"@nestjs/testing@^10.2.7":
+"@nestjs/testing@^10.2.8":
   version "10.2.8"
   resolved "https://registry.yarnpkg.com/@nestjs/testing/-/testing-10.2.8.tgz#9bf0a05770b5afacf85aaf4abd99caa2284c3dd5"
   integrity sha512-9Kj5IQhM67/nj/MT6Wi2OmWr5YQnCMptwKVFrX1TDaikpY12196v7frk0jVjdT7wms7rV07GZle9I2z0aSjqtQ==
@@ -2029,7 +2029,7 @@
   dependencies:
     "@types/istanbul-lib-report" "*"
 
-"@types/jest@^29.5.5":
+"@types/jest@^29.5.8":
   version "29.5.8"
   resolved "https://registry.yarnpkg.com/@types/jest/-/jest-29.5.8.tgz#ed5c256fe2bc7c38b1915ee5ef1ff24a3427e120"
   integrity sha512-fXEFTxMV2Co8ZF5aYFJv+YeA08RTYJfhtN5c9JSv/mFEMe+xxjufCb+PHL+bJcMs/ebPUsBu+UNTEz+ydXrR6g==
@@ -2176,7 +2176,7 @@ asynckit@^0.4.0:
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
   integrity sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==
 
-aws-cdk-lib@^2.109.0:
+aws-cdk-lib@^2.110.0:
   version "2.110.0"
   resolved "https://registry.yarnpkg.com/aws-cdk-lib/-/aws-cdk-lib-2.110.0.tgz#5af2a933a834b9efe3b99abf2c28adbd93f89547"
   integrity sha512-4IxjdtaoGjQPqtFyYXG6kOs9t/UTAh06tlGyCPpvhTZNoKNFUkku3H6MArlazpiKtm+dThdF+p5lQLB/kIu/qw==
