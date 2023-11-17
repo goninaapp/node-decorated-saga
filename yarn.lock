@@ -1403,9 +1403,9 @@
     tslib "2.6.2"
 
 "@nestjs/websockets@^10.2.8":
-  version "10.2.8"
-  resolved "https://registry.yarnpkg.com/@nestjs/websockets/-/websockets-10.2.8.tgz#2cdef8ec5072c3a513b082de16974a9918089235"
-  integrity sha512-oZN1VJFApN7d2eftr65a36QrV0IJNGba4znqyjFnyGvtDWTDcQwzDcnEfvJBTTYhOSBNS7KDfVhne0ythkl6tg==
+  version "10.2.9"
+  resolved "https://registry.yarnpkg.com/@nestjs/websockets/-/websockets-10.2.9.tgz#ab08f5edf6f5fb3ef217e28b84c80161879b2bd0"
+  integrity sha512-Hp/ioNMcBtCzkubgcDHeA5KH4YLBL1jHfMEacLctKDa20Kn/LFXhJhXVWEr4jEzUKXbD+Q+GyYk1V/1rJi6eHA==
   dependencies:
     iterare "1.2.1"
     object-hash "3.0.0"
