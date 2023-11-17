@@ -1388,9 +1388,9 @@
     tslib "2.6.2"
 
 "@nestjs/microservices@^10.2.8":
-  version "10.2.8"
-  resolved "https://registry.yarnpkg.com/@nestjs/microservices/-/microservices-10.2.8.tgz#ecef9dbaa40d9a686d5e9467c66886e1555895e8"
-  integrity sha512-zfrD7hgN3ygrjicASQUVdnsh3V7vTmhZfttZ7ZNjihwqEoweJFgWmqKkpAfbCrIP7z19gT4JQ8hO4W0Alwdt0w==
+  version "10.2.9"
+  resolved "https://registry.yarnpkg.com/@nestjs/microservices/-/microservices-10.2.9.tgz#dad6d538bcfb7b9985a1bbe273792ed7e7ef68b9"
+  integrity sha512-FaTejUUuzXHGuptmKMp8J3Bx6Sgi1DnckPYJF/ktWDm2V14BDhjWYF0uv642KsUmvkQUbeV2uaNHFC3ZPg4Pwg==
   dependencies:
     iterare "1.2.1"
     tslib "2.6.2"
