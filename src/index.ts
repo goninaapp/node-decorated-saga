@@ -24,9 +24,8 @@ import debugg from 'debug';
 
 import { Decoration, FailedKinesisBatch, Payload, Result } from './types';
 import { Database } from './database';
-import { DecoratedSagaTransport } from './transport';
 
-export { Payload, Decoration, Result, Database, DecoratedSagaTransport };
+export { Payload, Decoration, Result, Database };
 
 const error = debugg('error');
 const debug = debugg('debug');
