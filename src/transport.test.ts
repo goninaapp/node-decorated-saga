@@ -17,17 +17,19 @@ import { DecoratedSagaTransport } from './transport';
 import { KinesisStreamRecord } from 'aws-lambda';
 import { v4 as uuidv4 } from 'uuid';
 import { Payload, Result } from './types';
-import { Handler } from './index';
+import { Publisher } from './index';
 
 describe('transport', () => {
   let controller: TestController;
   let service: INestMicroservice;
   let transport: DecoratedSagaTransport;
+  let publisher: Publisher;
 
   beforeEach(async () => {
     process.env.DEBUG = '*';
 
     transport = new DecoratedSagaTransport('test');
+    publisher = new Publisher('test');
 
     service = await NestFactory.createMicroservice<MicroserviceOptions>(
       TestModule,
@@ -59,7 +61,7 @@ describe('transport', () => {
     );
 
     const mock = jest
-      .spyOn(Handler.prototype as any, 'publishInternal')
+      .spyOn(Publisher.prototype as any, 'publishInternal')
       .mockImplementation((payload: any) => {
         expect(payload.saga).toBe('event');
         expect(payload.context).toBe('123');
@@ -69,7 +71,7 @@ describe('transport', () => {
         expect(payload.decorations[0].service).toBe('test');
       });
 
-    const result = await transport.handler.handler({
+    const result = await transport.handler({
       Records: [payload],
     });
 
@@ -85,7 +87,7 @@ describe('transport', () => {
     const data = createKinesisRecord(id, JSON.stringify(payload));
 
     const mock = jest
-      .spyOn(Handler.prototype as any, 'publishInternal')
+      .spyOn(Publisher.prototype as any, 'publishInternal')
       .mockImplementation((payload: any) => {
         console.log(payload);
         expect(payload.saga).toBe('saga');
@@ -96,7 +98,7 @@ describe('transport', () => {
         expect(payload.decorations[0].service).toBe('test');
       });
 
-    const result = await transport.handler.handler({
+    const result = await transport.handler({
       Records: [data],
     });
 
@@ -112,12 +114,12 @@ describe('transport', () => {
 
     let received: any[] = [];
     const mock = jest
-      .spyOn(Handler.prototype as any, 'publish')
+      .spyOn(Publisher.prototype as any, 'publish')
       .mockImplementation((saga: any, payload: any) => {
         received = [saga, payload.id];
       });
 
-    const result = await transport.handler.handler({
+    const result = await transport.handler({
       Records: [data],
     });
 
@@ -148,9 +150,9 @@ class TestController {
   }
 
   @EventPattern('raw')
-  async rawEvent(@NestPayload() data: string, @Ctx() handler: Handler) {
+  async rawEvent(@NestPayload() data: string, @Ctx() publisher: Publisher) {
     console.log(data);
-    await handler.publish('raw', JSON.parse(data));
+    await publisher.publish('raw', JSON.parse(data));
   }
 }
 

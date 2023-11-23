@@ -42,11 +42,61 @@ export type ApiGatewayHandler = (
   payload: APIGatewayProxyEventV2,
 ) => Promise<APIGatewayProxyResultV2>;
 
+export class Publisher {
+  private readonly serviceName: string;
+  private readonly kinesis: Kinesis;
+  private readonly streamName: string;
+
+  constructor(serviceName: string) {
+    this.serviceName = serviceName;
+    this.kinesis = new Kinesis();
+    this.streamName = process.env.KINESIS_STREAM_NAME || 'message-bus';
+  }
+
+  public async publish(saga: string, data: Object, requests?: string[]) {
+    debug('publish', saga, data, requests);
+
+    const payload = new Payload(saga, data);
+
+    for (const req of requests || []) {
+      payload.addRequest(req);
+    }
+
+    return this.publishInternal(payload);
+  }
+
+  public async decorate(payload: Payload, result: Result) {
+    debug('decorate', payload, result);
+
+    payload.decorations.push(
+      new Decoration(result.type, this.serviceName, result.payload),
+    );
+
+    return this.publishInternal(payload);
+  }
+
+  private async publishInternal(payload: Payload) {
+    debug('publishInternal', payload);
+
+    const enc = new TextEncoder();
+
+    const input: PutRecordCommandInput = {
+      // PutRecordInput
+      StreamName: this.streamName,
+      Data: enc.encode(JSON.stringify(payload)),
+      PartitionKey: payload.saga,
+    };
+
+    return this.kinesis.send(new PutRecordCommand(input));
+  }
+}
+
 export class Handler {
   private readonly serviceName: string;
   private readonly kinesis: Kinesis;
   private readonly streamName: string;
   private readonly sqs: SQS;
+  private readonly publisher: Publisher;
   private handlers: Map<string, PayloadHandler>;
   private providers: Map<string, ProviderHandler>;
   private rawHandler?: RawHandler;
@@ -60,6 +110,7 @@ export class Handler {
     this.kinesis = new Kinesis();
     this.streamName = process.env.KINESIS_STREAM_NAME || 'message-bus';
     this.sqs = new SQS();
+    this.publisher = new Publisher(serviceName);
   }
 
   public registerHandler(saga: string, handler: PayloadHandler) {
@@ -249,7 +300,7 @@ export class Handler {
           payload.processedByService(this.serviceName),
         );
         if (res) {
-          await this.decorate(payload, res);
+          await this.publisher.decorate(payload, res);
         }
 
         return;
@@ -268,7 +319,7 @@ export class Handler {
     try {
       const res = await provider(payload);
       if (res) {
-        await this.decorate(payload, new Result(next, res));
+        await this.publisher.decorate(payload, new Result(next, res));
       }
 
       return;
@@ -276,42 +327,5 @@ export class Handler {
       error('handler error', e);
       return new Error('handler failed');
     }
-  }
-
-  public async publish(saga: string, data: Object, requests?: string[]) {
-    debug('publish', saga, data, requests);
-
-    const payload = new Payload(saga, data);
-
-    for (const req of requests || []) {
-      payload.addRequest(req);
-    }
-
-    return this.publishInternal(payload);
-  }
-
-  private async decorate(payload: Payload, result: Result) {
-    debug('decorate', payload, result);
-
-    payload.decorations.push(
-      new Decoration(result.type, this.serviceName, result.payload),
-    );
-
-    return this.publishInternal(payload);
-  }
-
-  private async publishInternal(payload: Payload) {
-    debug('publishInternal', payload);
-
-    const enc = new TextEncoder();
-
-    const input: PutRecordCommandInput = {
-      // PutRecordInput
-      StreamName: this.streamName,
-      Data: enc.encode(JSON.stringify(payload)),
-      PartitionKey: payload.saga,
-    };
-
-    return this.kinesis.send(new PutRecordCommand(input));
   }
 }

@@ -1,17 +1,23 @@
 import { CustomTransportStrategy, Server } from '@nestjs/microservices';
-import { Handler, Result } from './index';
+import { Handler, Publisher, Result } from './index';
 import { isObservable } from 'rxjs';
 
 export class DecoratedSagaTransport
   extends Server
   implements CustomTransportStrategy
 {
-  public handler: Handler;
+  private _handler: Handler;
+  private _publisher: Publisher;
 
   constructor(serviceName: string) {
     super();
 
-    this.handler = new Handler(serviceName);
+    this._handler = new Handler(serviceName);
+    this._publisher = new Publisher(serviceName);
+  }
+
+  async handler(payload: any) {
+    return this._handler.handler(payload);
   }
 
   /**
@@ -20,10 +26,10 @@ export class DecoratedSagaTransport
   listen(callback: () => void) {
     this.messageHandlers.forEach((handler, saga) => {
       if (handler.isEventHandler && saga !== 'raw') {
-        this.handler.registerHandler(
+        this._handler.registerHandler(
           saga,
           async (payload: any): Promise<Result | undefined> => {
-            const result = await handler(payload, this.handler);
+            const result = await handler(payload, this._publisher);
 
             if (isObservable(result)) {
               throw new Error('Observable not supported');
@@ -44,14 +50,14 @@ export class DecoratedSagaTransport
           },
         );
       } else if (handler.isEventHandler && saga === 'raw') {
-        this.handler.registerRawHandler(async (payload: any) => {
-          await handler(payload, this.handler);
+        this._handler.registerRawHandler(async (payload: any) => {
+          await handler(payload, this._publisher);
         });
       } else {
-        this.handler.registerProvider(
+        this._handler.registerProvider(
           saga,
           async (payload: any): Promise<Object | undefined> => {
-            const result = await handler(payload, this.handler);
+            const result = await handler(payload, this._publisher);
 
             if (isObservable(result)) {
               throw new Error('Observable not supported');
