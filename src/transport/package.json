@@ -1,6 +1,6 @@
 {
   "name": "@goninaapp/decorated-saga-transport",
-  "version": "2.3.0",
+  "version": "3.0.0",
   "description": "This package provides a minimal framework to implement the decorated saga pattern based on AWS Kinesis and AWS Lambda.",
   "files": [
     "dist"
@@ -22,7 +22,7 @@
     "test:format": "prettier --check \"src/**/*.ts\""
   },
   "dependencies": {
-    "@goninaapp/decorated-saga": "^2.3.0",
+    "@goninaapp/decorated-saga": "^3.0.0",
     "@nestjs/common": "^10.2.10",
     "@nestjs/core": "^10.2.10",
     "@nestjs/microservices": "^10.2.10",
