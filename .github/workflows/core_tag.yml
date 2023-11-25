@@ -19,7 +19,7 @@ jobs:
           node-version: 18
           cache: 'yarn'
 
-      - run:
+      - run: |
           cd src/core
           yarn install --frozen-lockfile --production=false
           yarn test:format
