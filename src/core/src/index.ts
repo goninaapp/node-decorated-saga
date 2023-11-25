@@ -23,9 +23,8 @@ import { extract, RawPayload } from './payload';
 import debugg from 'debug';
 
 import { Decoration, FailedKinesisBatch, Payload, Result } from './types';
-import { Database } from './database';
 
-export { Payload, Decoration, Result, Database };
+export { Payload, Decoration, Result };
 
 const error = debugg('error');
 const debug = debugg('debug');

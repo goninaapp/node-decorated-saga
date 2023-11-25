@@ -13,11 +13,10 @@ import {
   MicroserviceOptions,
 } from '@nestjs/microservices';
 import { NestFactory } from '@nestjs/core';
-import { DecoratedSagaTransport } from './transport';
+import { DecoratedSagaTransport } from './index';
 import { KinesisStreamRecord } from 'aws-lambda';
 import { v4 as uuidv4 } from 'uuid';
-import { Payload, Result } from './types';
-import { Publisher } from './index';
+import {Payload, Publisher, Result} from '@goninaapp/decorated-saga';
 
 describe('transport', () => {
   let controller: TestController;
@@ -29,7 +28,6 @@ describe('transport', () => {
     process.env.DEBUG = '*';
 
     transport = new DecoratedSagaTransport('test');
-    publisher = new Publisher('test');
 
     service = await NestFactory.createMicroservice<MicroserviceOptions>(
       TestModule,

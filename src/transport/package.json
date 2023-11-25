@@ -1,0 +1,48 @@
+{
+  "name": "@goninaapp/decorated-saga-transport",
+  "version": "2.3.0",
+  "description": "This package provides a minimal framework to implement the decorated saga pattern based on AWS Kinesis and AWS Lambda.",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "module": "./dist/index.mjs",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/goninaapp/node-decorated-saga.git"
+  },
+  "scripts": {
+    "format": "prettier --write \"src/**/*.ts\"",
+    "build": "tsup",
+    "test": "jest",
+    "test:format": "prettier --check \"src/**/*.ts\""
+  },
+  "dependencies": {
+    "@goninaapp/decorated-saga": "^2.3.0",
+    "@nestjs/common": "^10.2.10",
+    "@nestjs/core": "^10.2.10",
+    "@nestjs/microservices": "^10.2.10",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^7.8.1",
+    "uuid": "^9.0.1"
+  },
+  "peerDependencies": {
+    "@nestjs/microservices": "^10.2.10",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.1.0",
+    "ts-jest": "^29.1.1",
+    "ts-node": "^10.9.1",
+    "tsup": "^7.2.0",
+    "typescript": "~5.2.2"
+  },
+  "author": "Ferdinand von Hagen",
+  "license": "ISC"
+}

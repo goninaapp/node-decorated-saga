@@ -17,3 +17,5 @@ cdk.out
 # Build files
 /dist
 /dist.test
+
+src/**/dist
