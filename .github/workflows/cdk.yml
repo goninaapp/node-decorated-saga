@@ -1,8 +1,8 @@
-name: deploy
+name: deploy_cdk
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - 'cdk/v*.*.*'
 
 jobs:
   deploy:
@@ -22,9 +22,9 @@ jobs:
           cache: 'yarn'
 
       - run: |
+          cd src/cdk
           yarn install --frozen-lockfile --production=false
           yarn build
-
-      - run: yarn publish --access public
+          yarn publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
