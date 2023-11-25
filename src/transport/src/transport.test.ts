@@ -16,7 +16,7 @@ import { NestFactory } from '@nestjs/core';
 import { DecoratedSagaTransport } from './index';
 import { KinesisStreamRecord } from 'aws-lambda';
 import { v4 as uuidv4 } from 'uuid';
-import {Payload, Publisher, Result} from '@goninaapp/decorated-saga';
+import { Payload, Publisher, Result } from '@goninaapp/decorated-saga';
 
 describe('transport', () => {
   let controller: TestController;
