@@ -44,5 +44,5 @@ jobs:
         uses: rickstaa/action-create-tag@v1
         with:
           github_token: ${{ secrets.PAT }}
-          tag: core/${{ env.current_version }}
+          tag: ${{ env.current_version }}
           message: "Release ${{ env.current_version }}"
