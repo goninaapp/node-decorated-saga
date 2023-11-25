@@ -1,6 +1,14 @@
 version: 2
 updates:
   - package-ecosystem: "npm"
-    directory: "/"
+    directory: "src/core"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "npm"
+    directory: "src/transport"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "npm"
+    directory: "src/cdk"
     schedule:
       interval: "daily"

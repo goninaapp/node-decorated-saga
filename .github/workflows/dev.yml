@@ -1,7 +1,7 @@
 name: dev
 on:
   pull_request:
-    branches: ['*']
+    branches: [ '*' ]
 
 jobs:
   deploy:
@@ -19,10 +19,25 @@ jobs:
           node-version: 18
           cache: 'yarn'
 
-      - run: yarn install --frozen-lockfile --production=false
-
-      - name: Test
+      - name: Test core
         run: |
-          yarn test
+          cd src/core
+          yarn install --frozen-lockfile --production=false
           yarn test:format
-          tsc
+          yarn test
+          cd ../..
+
+      - name: Test cdk
+        run: |
+          cd src/cdk
+          yarn install --frozen-lockfile --production=false
+          yarn test:format
+          cd ../..
+
+      - name: Test transport
+        run: |
+          cd src/transport
+          yarn install --frozen-lockfile --production=false
+          yarn test:format
+          yarn test
+          cd ../..

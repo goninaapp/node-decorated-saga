@@ -1,4 +1,4 @@
-import { Handler, Result, Payload } from '../src';
+import { Handler, Result, Payload } from '../src/core';
 import { APIGatewayProxyEventV2 } from "aws-lambda";
 import { SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
 

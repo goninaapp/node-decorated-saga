@@ -1,5 +1,5 @@
 import { CustomTransportStrategy, Server } from '@nestjs/microservices';
-import { Handler, Publisher, Result } from './index';
+import { Handler, Publisher, Result } from '@goninaapp/decorated-saga';
 import { isObservable } from 'rxjs';
 
 export class DecoratedSagaTransport
