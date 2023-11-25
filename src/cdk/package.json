@@ -1,6 +1,6 @@
 {
   "name": "@goninaapp/decorated-saga-cdk",
-  "version": "2.3.0",
+  "version": "3.0.0",
   "description": "This package provides a minimal framework to implement the decorated saga pattern based on AWS Kinesis and AWS Lambda.",
   "files": [
     "dist"
@@ -23,6 +23,7 @@
   "devDependencies": {
     "@types/node": "^20.10.0",
     "aws-cdk-lib": "2.110.1",
+    "constructs": "10.0.0",
     "prettier": "^3.1.0",
     "ts-node": "^10.9.1",
     "tsup": "^8.0.1",

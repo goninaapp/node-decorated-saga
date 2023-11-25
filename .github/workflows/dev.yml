@@ -25,6 +25,7 @@ jobs:
           yarn install --frozen-lockfile --production=false
           yarn test:format
           yarn test
+          yarn build
           cd ../..
 
       - name: Test cdk
@@ -32,6 +33,7 @@ jobs:
           cd src/cdk
           yarn install --frozen-lockfile --production=false
           yarn test:format
+          yarn build
           cd ../..
 
       - name: Test transport
@@ -40,4 +42,5 @@ jobs:
           yarn install --frozen-lockfile --production=false
           yarn test:format
           yarn test
+          yarn build
           cd ../..
