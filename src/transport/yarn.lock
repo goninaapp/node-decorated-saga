@@ -917,10 +917,10 @@
   resolved "https://registry.yarnpkg.com/@esbuild/win32-x64/-/win32-x64-0.19.9.tgz#b2da6219b603e3fa371a78f53f5361260d0c5585"
   integrity sha512-oxoQgglOP7RH6iasDrhY+R/3cHrfwIDvRlT4CGChflq6twk8iENeVvMJjmvBb94Ik1Z+93iGO27err7w6l54GQ==
 
-"@goninaapp/decorated-saga@^3.0.1":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@goninaapp/decorated-saga/-/decorated-saga-3.0.1.tgz#44d9973498d548c9fcc511023dd0bcf7204b4c80"
-  integrity sha512-cuxku9LygbvDWKQoTjzSeDGQN+lx9ujReuT4H2jO1/BbtomiOQ6FR3Y+kuCbXZ1iK+tiaxWTR+NiWejYctDOaw==
+"@goninaapp/decorated-saga@^3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@goninaapp/decorated-saga/-/decorated-saga-3.0.2.tgz#54eff0bad98a9427b8c7e3f1698ed43b8c062640"
+  integrity sha512-C0CMXOrY0NwSXN7y1HZsEG417FS+fRWN4eqNVieKBYoU7gBqx3GIULi2Grj74cBaRJWsMJckZXqzTHVIqHDm2w==
   dependencies:
     "@aws-sdk/client-kinesis" "^3.457.0"
     "@aws-sdk/client-sqs" "^3.454.0"
