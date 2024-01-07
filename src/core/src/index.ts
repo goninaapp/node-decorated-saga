@@ -140,6 +140,10 @@ export class Handler {
   public async handler(request: any): Promise<any> {
     debug('handler', JSON.stringify(request));
 
+    if (request['detail-type'] == 'Scheduled Event') {
+      return this.handleRaw(new RawPayload(request.id, request));
+    }
+
     if (!request.hasOwnProperty('Records')) {
       return this.handleApiGatewayRequest(request as APIGatewayProxyEventV2);
     }
