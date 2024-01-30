@@ -937,9 +937,9 @@
   integrity sha512-T1QyPSDCyMXaO3pzBkF96E8xMkiRYbUEZADd29SyPGabqxMViNoii+NcK7eWJAEoU6RZyEm5lVSIjTmcdoB9HA==
 
 "@goninaapp/decorated-saga@^3.0.3":
-  version "3.0.3"
-  resolved "https://registry.yarnpkg.com/@goninaapp/decorated-saga/-/decorated-saga-3.0.3.tgz#baed1b7b7482f0023bccdc366a2389794833514e"
-  integrity sha512-zfvDRbBROSj7vP9oui8MI2bzmqnUyxaI4r8nnbLqO+MrnY4CYXa0Cuz++PFnpsmruZgBiPU8lAcsNKcLc3lcdg==
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/@goninaapp/decorated-saga/-/decorated-saga-3.0.4.tgz#cab82fce9751b498d80284d0da484c4602e396d9"
+  integrity sha512-5LEmChgX2TuTbi5TqBWcPA5XuKI+o2FP2cJi/6NIzdV6ZATCRXkQeJFDO3ERqjhOQsDt7NLDHTyxA9AhvQpuFQ==
   dependencies:
     "@aws-sdk/client-kinesis" "^3.485.0"
     "@aws-sdk/client-sqs" "^3.485.0"
